@@ -4,18 +4,17 @@ import argparse
 import models
 import datasets
 import time
-from tqdm import tqdm
 import utils
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
     '--dataset',
     choices=['mnist', 'fashion', 'digits', 'boston'],
-    default='mnist'
-)
+    default='mnist')
+parser.add_argument('--epochs', type=int, default=20)
 parser.add_argument('--units', type=int, default=1024)
 parser.add_argument('--batch_size', type=int, default=32)
-parser.add_argument('--activation', choices=['sigmoid'], default='sigmoid')
+parser.add_argument('--activation', choices=['sigmoid','relu'], default='sigmoid')
 parser.add_argument('--loss', choices=['mean_squared_error'], default='mean_squared_error')
 
 def main(args):
@@ -27,32 +26,55 @@ def main(args):
     x_train_init, x_train_seq = x_train[:border], x_train[border:]
     y_train_init, y_train_seq = y_train[:border], y_train[border:]
 
-    # training
-    os_elm = models.OS_ELM(
-        inputs=dataset.inputs,
-        units=args.units,
-        outputs=dataset.outputs,
-        activation=args.activation,
-        loss=args.loss)
+    test_loss = []
+    test_acc = []
+    seq_time = []
+    init_time = []
+    pred_time = []
+    for epoch in range(args.epochs):
 
-    print('now initial training phase...')
-    os_elm.init_train(x_train_init, y_train_init)
+        # instantiate model
+        os_elm = models.OS_ELM(
+            inputs=dataset.inputs,
+            units=args.units,
+            outputs=dataset.outputs,
+            activation=args.activation,
+            loss=args.loss)
 
-    print('now sequential training phase...')
-    pbar = tqdm(total=len(x_train_seq))
-    for i in range(0, len(x_train_seq), args.batch_size):
-        x_batch = x_train_seq[i:i+args.batch_size]
-        y_batch = y_train_seq[i:i+args.batch_size]
-        os_elm.seq_train(x_batch, y_batch)
-        pbar.update(len(x_batch))
-    pbar.close()
+        # initial training
+        stime = time.time()
+        os_elm.init_train(x_train_init, y_train_init)
+        init_time.append(time.time() - stime)
 
-    print('now evaluation phase...')
-    test_loss = os_elm.compute_loss(x_test,y_test)
-    print('test loss: %f' % test_loss)
+        # sequential training
+        for i in range(0, len(x_train_seq), args.batch_size):
+            x_batch = x_train_seq[i:i+args.batch_size]
+            y_batch = y_train_seq[i:i+args.batch_size]
+            stime = time.time()
+            os_elm.seq_train(x_batch, y_batch)
+            seq_time.append(time.time() - stime)
+
+        # evaluation
+        # prediction time
+        stime = time.time()
+        os_elm(np.zeros(shape=(args.batch_size,dataset.inputs)))
+        pred_time.append(time.time() - stime)
+
+        # loss and accuracy
+        test_loss.append(os_elm.compute_loss(x_test,y_test))
+        if dataset.type == 'classification':
+            test_acc.append(os_elm.compute_accuracy(x_test,y_test))
+
+    # show result
+    print('********** |dataset:%s|units:%d|batch_size:%d| **********' % (
+        args.dataset, args.units, args.batch_size
+    ))
+    print('test_loss: %f' % np.mean(test_loss))
     if dataset.type == 'classification':
-        test_acc = os_elm.compute_accuracy(x_test,y_test)
-        print('test acc: %f' % test_acc)
+        print('test_acc: %f' % np.mean(test_acc))
+    print('init_time: %f[sec]' % np.mean(init_time))
+    print('seq_time: %f[sec/batch]' % np.mean(seq_time))
+    print('pred_time: %f[sec/batch]' % np.mean(pred_time))
 
 if __name__ == '__main__':
     args = parser.parse_args()
