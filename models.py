@@ -1,42 +1,58 @@
 import keras
-from keras.models import Sequential
-from keras.layers import Dense, Dropout, Flatten
+from keras.layers import Input
+from keras.models import Model
+from keras.layers import Dense, Dropout, Flatten, Reshape
 from keras.layers import Conv2D, MaxPooling2D
 from keras import backend as K
+from keras.optimizers import Adam
+from keras.losses import categorical_crossentropy
 import numpy as np
 import pickle
 
-def mnist_cnn():
-    input_shape = (28,28,1)
-    model = Sequential()
-    model.add(Conv2D(32, (3,3), activation='relu', input_shape=input_shape))
-    model.add(Conv2D(64, (3, 3), activation='relu'))
-    model.add(MaxPooling2D(pool_size=(2, 2)))
-    model.add(Dropout(0.25))
-    model.add(Flatten())
-    model.add(Dense(128, activation='relu'))
-    model.add(Dropout(0.5))
-    model.add(Dense(num_classes, activation='softmax'))
+def mnist_cnn(train=True):
+
+    input = Input(shape=(28*28,))
+    x = Reshape((28,28,1))(input)
+    x = Conv2D(32, (3,3), activation='relu')(x)
+    x = Conv2D(64, (3,3), activation='relu')(x)
+    x = MaxPooling2D((2,2))(x)
+    x = Dropout(0.25)(x)
+    x = Flatten()(x)
+    x = Dense(128, activation='relu')(x)
+    x = Dropout(0.5)(x)
+    x = Dense(10, activation='softmax')(x)
+    model = Model(input,x)
+    if train:
+        model.compile(
+            optimizer=Adam(),
+            loss=categorical_crossentropy,
+            metrics=['accuracy'])
     return model
 
-def digits_cnn():
-    input_shape = (8,8,1)
-    model = Sequential()
-    model.add(Conv2D(32, (3,3), activation='relu', padding='same', input_shape=input_shape))
-    model.add(Conv2D(64, (3, 3), activation='relu', padding='same'))
-    model.add(MaxPooling2D(pool_size=(2, 2)))
-    model.add(Dropout(0.25))
-    model.add(Flatten())
-    model.add(Dense(128, activation='relu'))
-    model.add(Dropout(0.5))
-    model.add(Dense(num_classes, activation='softmax'))
+def digits_cnn(train=True):
+    input = Input(shape=(8*8,))
+    x = Reshape((8,8,1))(input)
+    x = Conv2D(32, (3,3), activation='relu', padding='same')(x)
+    x = Conv2D(64, (3,3), activation='relu', padding='same')(x)
+    x = MaxPooling2D((2,2))(x)
+    x = Dropout(0.25)(x)
+    x = Flatten()(x)
+    x = Dense(128, activation='relu')(x)
+    x = Dropout(0.5)(x)
+    x = Dense(10, activation='softmax')(x)
+    model = Model(input,x)
+    if train:
+        model.compile(
+            optimizer=Adam(),
+            loss=categorical_crossentropy,
+            metrics=['accuracy'])
     return model
 
-def get_model(model_name):
-    if model_name == 'mnist' or model_name == 'fashion':
-        return mnist_cnn()
-    elif model_name == 'digits':
-        return digits_cnn()
+def get_model(model_name, train=True):
+    if model_name == 'mnist_cnn' or model_name == 'fashion_cnn':
+        return mnist_cnn(train)
+    elif model_name == 'digits_cnn':
+        return digits_cnn(train)
     else:
         raise Exception('unknown model \'%s\' was spedified.' % model_name)
 
