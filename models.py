@@ -6,7 +6,7 @@ from keras import backend as K
 import numpy as np
 import pickle
 
-def mnist_model():
+def mnist_cnn():
     input_shape = (28,28,1)
     model = Sequential()
     model.add(Conv2D(32, (3,3), activation='relu', input_shape=input_shape))
@@ -19,7 +19,7 @@ def mnist_model():
     model.add(Dense(num_classes, activation='softmax'))
     return model
 
-def digits_model():
+def digits_cnn():
     input_shape = (8,8,1)
     model = Sequential()
     model.add(Conv2D(32, (3,3), activation='relu', padding='same', input_shape=input_shape))
@@ -34,9 +34,9 @@ def digits_model():
 
 def get_model(model_name):
     if model_name == 'mnist' or model_name == 'fashion':
-        return mnist_model()
+        return mnist_cnn()
     elif model_name == 'digits':
-        return digits_model()
+        return digits_cnn()
     else:
         raise Exception('unknown model \'%s\' was spedified.' % model_name)
 
