@@ -6,7 +6,7 @@ loss="mean_squared_error"
 out="result.txt"
 
 ## mnist
-for units in 512 1024 2048 4096
+for units in 512 1024 2048
 do
     for batch_size in 8 16 32
     do
@@ -16,7 +16,7 @@ do
 done
 
 ## fashion mnist
-for units in 512 1024 2048 4096
+for units in 512 1024 2048
 do
     for batch_size in 8 16 32
     do
@@ -26,7 +26,7 @@ do
 done
 
 ## digits
-for units in 64 128 256 512
+for units in 128 256 512
 do
     for batch_size in 8 16 32
     do
@@ -36,7 +36,7 @@ do
 done
 
 ## boston
-for units in 16 32 64 128
+for units in 16 32 64
 do
     for batch_size in 8 16 32
     do
