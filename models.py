@@ -1,5 +1,44 @@
+import keras
+from keras.models import Sequential
+from keras.layers import Dense, Dropout, Flatten
+from keras.layers import Conv2D, MaxPooling2D
+from keras import backend as K
 import numpy as np
 import pickle
+
+def mnist_model():
+    input_shape = (28,28,1)
+    model = Sequential()
+    model.add(Conv2D(32, (3,3), activation='relu', input_shape=input_shape))
+    model.add(Conv2D(64, (3, 3), activation='relu'))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
+    model.add(Dropout(0.25))
+    model.add(Flatten())
+    model.add(Dense(128, activation='relu'))
+    model.add(Dropout(0.5))
+    model.add(Dense(num_classes, activation='softmax'))
+    return model
+
+def digits_model():
+    input_shape = (8,8,1)
+    model = Sequential()
+    model.add(Conv2D(32, (3,3), activation='relu', padding='same', input_shape=input_shape))
+    model.add(Conv2D(64, (3, 3), activation='relu', padding='same'))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
+    model.add(Dropout(0.25))
+    model.add(Flatten())
+    model.add(Dense(128, activation='relu'))
+    model.add(Dropout(0.5))
+    model.add(Dense(num_classes, activation='softmax'))
+    return model
+
+def get_model(model_name):
+    if model_name == 'mnist' or model_name == 'fashion':
+        return mnist_model()
+    elif model_name == 'digits':
+        return digits_model()
+    else:
+        raise Exception('unknown model \'%s\' was spedified.' % model_name)
 
 # Network definition
 class OS_ELM(object):
