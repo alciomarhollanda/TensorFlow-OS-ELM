@@ -16,6 +16,7 @@ parser.add_argument('--units', type=int, default=1024)
 parser.add_argument('--batch_size', type=int, default=32)
 parser.add_argument('--activation', choices=['sigmoid','relu'], default='sigmoid')
 parser.add_argument('--loss', choices=['mean_squared_error'], default='mean_squared_error')
+parser.add_argument('--result', default=None)
 
 def main(args):
 
@@ -75,6 +76,13 @@ def main(args):
     print('init_time: %f[sec]' % np.mean(init_time))
     print('seq_time: %f[sec/batch]' % np.mean(seq_time))
     print('pred_time: %f[sec/batch]' % np.mean(pred_time))
+
+    # save model
+    if args.result:
+        if os.path.exists(args.result) == False:
+            os.makedirs(args.result)
+        fname = '%s_u%d_n%d.pkl' % (args.dataset, args.units, args.batch_size)
+        os_elm.save(os.path.join(args.result, fname))
 
 if __name__ == '__main__':
     args = parser.parse_args()
