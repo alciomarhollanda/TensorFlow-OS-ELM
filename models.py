@@ -147,7 +147,3 @@ class OS_ELM(object):
             self.alpha = weights['alpha']
             self.beta = weights['beta']
             self.p = weights['p']
-
-    def save(self, path):
-        with open(path, 'wb') as f:
-            pickle.dump(self,f)
