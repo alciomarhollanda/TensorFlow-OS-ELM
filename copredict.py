@@ -5,7 +5,6 @@ import pickle
 import os
 import argparse
 import datasets
-import models
 
 parser = argparse.ArgumentParser()
 parser.add_argument('batch_model')

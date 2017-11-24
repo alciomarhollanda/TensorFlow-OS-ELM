@@ -56,6 +56,17 @@ def get_model(model_name, train=True):
     else:
         raise Exception('unknown model \'%s\' was spedified.' % model_name)
 
+def load_model(path):
+    with open(path, 'rb') as f:
+        arc = pickle.load(f)
+    os_elm = OS_ELM(
+        inputs=arc['inputs'],
+        units=arc['units'],
+        outputs=arc['outputs'],
+        activation=arc['activation'],
+        loss=arc['loss'])
+    return os_elm
+
 # Network definition
 class OS_ELM(object):
 
@@ -87,6 +98,8 @@ class OS_ELM(object):
         self.beta = np.random.rand(units, outputs) * 2.0 - 1.0 # [-1.0, 1.0]
         self.bias = np.zeros(shape=(1,self.units))
         self.p = None
+        self.activation = activation
+        self.loss = loss
         if loss == 'mean_squared_error':
             self.lossfun = self.__mean_squared_error
         else:
@@ -147,3 +160,16 @@ class OS_ELM(object):
             self.alpha = weights['alpha']
             self.beta = weights['beta']
             self.p = weights['p']
+
+    def save(self, path):
+        arc = {
+            'alpha': self.alpha,
+            'beta': self.beta,
+            'p': self.p,
+            'inputs': self.inputs,
+            'units': self.units,
+            'outputs': self.outputs,
+            'activation': self.activation,
+            'loss': self.loss}
+        with open(path, 'wb') as f:
+            pickle.dump(arc, f)

@@ -83,8 +83,7 @@ def main(args):
         if os.path.exists(args.result) == False:
             os.makedirs(args.result)
         fname = '%s_u%d_b%d.pkl' % (args.dataset, args.units, args.batch_size)
-        with open(os.path.join(args.result,fname), 'wb') as f:
-            pickle.dump(os_elm, f)
+        os_elm.save(os.path.join(args.result, fname))
 
 if __name__ == '__main__':
     args = parser.parse_args()
