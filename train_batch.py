@@ -6,10 +6,10 @@ import models
 parser = argparse.ArgumentParser()
 parser.add_argument(
     'model',
-    choices=['mnist_cnn', 'fashion_cnn', 'digits_cnn'])
+    choices=['mnist_cnn', 'fashion_cnn', 'digits_cnn', 'boston_mlp', 'boston_slp'])
 parser.add_argument(
     'dataset',
-    choices=['mnist', 'fashion', 'digits'])
+    choices=['mnist', 'fashion', 'digits', 'boston'])
 parser.add_argument('--epochs', type=int, default=20)
 parser.add_argument('--batch_size', type=int, default=32)
 parser.add_argument('--result', default=None)

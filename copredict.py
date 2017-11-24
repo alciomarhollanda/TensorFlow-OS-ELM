@@ -1,10 +1,10 @@
 import keras
-from keras.models import load_model
 import numpy as np
 import pickle
 import os
 import argparse
 import datasets
+import models
 
 parser = argparse.ArgumentParser()
 parser.add_argument('batch_model')
@@ -33,9 +33,8 @@ def main(args):
     (_, _), (x_test, y_test) = dataset.load_data()
 
     # instantiate models
-    batch_model = load_model(args.batch_model)
-    with open(args.speed_model, 'rb') as f:
-        speed_model = pickle.load(f)
+    batch_model = keras.models.load_model(args.batch_model)
+    speed_model = models.load_model(args.speed_model)
 
     # prediction loop
     for i in range(0,len(x_test),args.batch_size):

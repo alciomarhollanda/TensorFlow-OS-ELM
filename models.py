@@ -5,9 +5,12 @@ from keras.layers import Dense, Dropout, Flatten, Reshape
 from keras.layers import Conv2D, MaxPooling2D
 from keras import backend as K
 from keras.optimizers import Adam
-from keras.losses import categorical_crossentropy
+from keras.losses import categorical_crossentropy, mean_squared_error
 import numpy as np
 import pickle
+
+def my_mean_squared_error(y_true, y_pred):
+    return 0.5 * K.mean(K.square(y_pred - y_true), axis=-1)
 
 def mnist_cnn(train=True):
 
@@ -48,11 +51,40 @@ def digits_cnn(train=True):
             metrics=['accuracy'])
     return model
 
+def boston_slp(train=True):
+    input = Input(shape=(13,))
+    x = Dense(16, activation='relu')(input)
+    x = Dense(1, activation='sigmoid')(x)
+    model = Model(input,x)
+    if train:
+        model.compile(
+            optimizer=Adam(),
+            loss=my_mean_squared_error)
+    return model
+
+def boston_mlp(train=True):
+    input = Input(shape=(13,))
+    x = Dense(512, activation='relu')(input)
+    x = Dropout(0.2)(x)
+    x = Dense(512, activation='relu')(x)
+    x = Dropout(0.2)(x)
+    x = Dense(1, activation='sigmoid')(x)
+    model = Model(input,x)
+    if train:
+        model.compile(
+            optimizer=Adam(),
+            loss=my_mean_squared_error)
+    return model
+
 def get_model(model_name, train=True):
     if model_name == 'mnist_cnn' or model_name == 'fashion_cnn':
         return mnist_cnn(train)
     elif model_name == 'digits_cnn':
         return digits_cnn(train)
+    elif model_name == 'boston_mlp':
+        return boston_mlp(train)
+    elif model_name == 'boston_slp':
+        return boston_slp(train)
     else:
         raise Exception('unknown model \'%s\' was spedified.' % model_name)
 
