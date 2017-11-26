@@ -105,6 +105,9 @@ class OS_ELM(object):
     def __mean_squared_error(self, out, y):
         return 0.5 * np.mean((out - y)**2)
 
+    def __l1_error(self, out, y):
+        return np.mean(np.abs((out - y)))
+
     def __accuracy(self, out, y):
         batch_size = len(out)
         accuracy = np.sum((np.argmax(out, axis=1) == np.argmax(y, axis=1)))
@@ -134,6 +137,8 @@ class OS_ELM(object):
         self.loss = loss
         if loss == 'mean_squared_error':
             self.lossfun = self.__mean_squared_error
+        elif loss == 'l1_error':
+            self.lossfun = self.__l1_error
         else:
             raise Exception('unknown loss function was specified.')
         if activation == 'sigmoid':
