@@ -13,8 +13,8 @@ def add_gaussian_noise(x, mean=0., sigma=0.4):
 
 def main():
 
-    dataset_sub = datasets.get_dataset('mnist')
-    dataset = datasets.get_dataset('fashion')
+    dataset = datasets.get_dataset('mnist')
+    dataset_sub = datasets.get_dataset('fashion')
     (x_train, y_train), (x_test, y_test) = dataset.load_data()
     (x_train_sub, y_train_sub), (x_test_sub, y_test_sub) = dataset_sub.load_data()
 
