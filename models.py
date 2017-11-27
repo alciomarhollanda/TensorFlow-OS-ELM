@@ -1,4 +1,4 @@
-import keras
+mean_squared_errorimport keras
 from keras.layers import Input
 from keras.models import Model
 from keras.layers import Dense, Dropout, Flatten, Reshape
@@ -8,9 +8,6 @@ from keras.optimizers import Adam
 from keras.losses import categorical_crossentropy, mean_squared_error
 import numpy as np
 import pickle
-
-def my_mean_squared_error(y_true, y_pred):
-    return 0.5 * K.mean(K.square(y_pred - y_true), axis=-1)
 
 def mnist_cnn_ae(train=True):
     input = Input(shape=(28*28,))
@@ -33,7 +30,7 @@ def mnist_cnn_ae(train=True):
     if train:
         model.compile(
             optimizer=Adam(),
-            loss=my_mean_squared_error)
+            loss=mean_squared_error)
     return model
 
 def mnist_cnn(train=True):
@@ -83,7 +80,7 @@ def boston_slp(train=True):
     if train:
         model.compile(
             optimizer=Adam(),
-            loss=my_mean_squared_error)
+            loss=mean_squared_error)
     return model
 
 def boston_mlp(train=True):
@@ -97,7 +94,7 @@ def boston_mlp(train=True):
     if train:
         model.compile(
             optimizer=Adam(),
-            loss=my_mean_squared_error)
+            loss=mean_squared_error)
     return model
 
 def get_model(model_name, train=True):
@@ -129,7 +126,7 @@ def load_model(path):
 class OS_ELM(object):
 
     def __mean_squared_error(self, out, y):
-        return 0.5 * np.mean((out - y)**2)
+        return np.mean((out - y)**2)
 
     def __l1_error(self, out, y):
         return np.mean(np.abs((out - y)))
