@@ -5,7 +5,11 @@ import datasets
 import models
 
 parser = argparse.ArgumentParser()
-parser.add_argument('model',choices=['mnist_cnn_ae','fashion_cnn_ae'])
+parser.add_argument('model',choices=[
+    'mnist_cnn_ae',
+    'mnist_slp_ae',
+    'fashion_cnn_ae',
+    'fashion_slp_ae'])
 parser.add_argument('anomal_class',type=int)
 parser.add_argument('dataset',choices=['mnist','fashion','digits'])
 parser.add_argument('--epochs', type=int, default=20)

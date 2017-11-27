@@ -9,6 +9,18 @@ from keras.losses import categorical_crossentropy, mean_squared_error
 import numpy as np
 import pickle
 
+
+def mnist_slp_ae(train=True):
+    input = Input(shape=(28*28,))
+    x = Dense(1024, activation='relu')(input)
+    x = Dense(28*28, activation='sigmoid')(x)
+    model = Model(input,x)
+    if train:
+        model.compile(
+            optimizer=Adam(),
+            loss=mean_squared_error)
+    return model
+
 def mnist_cnn_ae(train=True):
     input = Input(shape=(28*28,))
     x = Reshape((28,28,1))(input)
@@ -102,6 +114,8 @@ def get_model(model_name, train=True):
         return mnist_cnn(train)
     elif model_name == 'mnist_cnn_ae' or model_name == 'fashion_cnn_ae':
         return mnist_cnn_ae(train)
+    elif model_name == 'mnist_slp_ae' or model_name == 'fashion_slp_ae':
+        return mnist_slp_ae()
     elif model_name == 'digits_cnn':
         return digits_cnn(train)
     elif model_name == 'boston_mlp':
