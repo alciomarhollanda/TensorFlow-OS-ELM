@@ -2,7 +2,7 @@ import keras
 from keras.layers import Input
 from keras.models import Model
 from keras.layers import Dense, Dropout, Flatten, Reshape
-from keras.layers import Conv2D, MaxPooling2D
+from keras.layers import Conv2D, MaxPooling2D, UpSampling2D
 from keras import backend as K
 from keras.optimizers import Adam
 from keras.losses import categorical_crossentropy, mean_squared_error
@@ -11,6 +11,30 @@ import pickle
 
 def my_mean_squared_error(y_true, y_pred):
     return 0.5 * K.mean(K.square(y_pred - y_true), axis=-1)
+
+def mnist_cnn_ae(train=True):
+    input = Input(shape=(28*28,))
+    x = Reshape((28,28,1))(input)
+    x = Conv2D(16, (3, 3), activation='relu', padding='same')(x)
+    x = MaxPooling2D((2, 2), padding='same')(x)
+    x = Conv2D(8, (3, 3), activation='relu', padding='same')(x)
+    x = MaxPooling2D((2, 2), padding='same')(x)
+    x = Conv2D(8, (3, 3), activation='relu', padding='same')(x)
+    encoded = MaxPooling2D((2, 2), padding='same')(x)
+    x = Conv2D(8, (3, 3), activation='relu', padding='same')(encoded)
+    x = UpSampling2D((2, 2))(x)
+    x = Conv2D(8, (3, 3), activation='relu', padding='same')(x)
+    x = UpSampling2D((2, 2))(x)
+    x = Conv2D(16, (3, 3), activation='relu')(x)
+    x = UpSampling2D((2, 2))(x)
+    decoded = Conv2D(1, (3, 3), activation='sigmoid', padding='same')(x)
+    decoded = Reshape((28*28,))(decoded)
+    model = Model(input,decoded)
+    if train:
+        model.compile(
+            optimizer=Adam(),
+            loss=my_mean_squared_error)
+    return model
 
 def mnist_cnn(train=True):
 
@@ -79,6 +103,8 @@ def boston_mlp(train=True):
 def get_model(model_name, train=True):
     if model_name == 'mnist_cnn' or model_name == 'fashion_cnn':
         return mnist_cnn(train)
+    elif model_name == 'mnist_cnn_ae' or model_name == 'fashion_cnn_ae':
+        return mnist_cnn_ae(train)
     elif model_name == 'digits_cnn':
         return digits_cnn(train)
     elif model_name == 'boston_mlp':
