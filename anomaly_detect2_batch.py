@@ -10,8 +10,8 @@ parser.add_argument('model',choices=['mnist_slp_ae'])
 parser.add_argument('dataset_normal',choices=['mnist','fashion'])
 parser.add_argument('dataset_anomal',choices=['mnist','fashion'])
 parser.add_argument('--k',type=float,default=3.)
-parser.add_argument('--epochs',type=int,default=1024)
-parser.add_argument('--batch_size',type=int,default=32)
+parser.add_argument('--epochs',type=int,default=20)
+parser.add_argument('--batch_size',type=int,default=256)
 
 def add_gaussian_noise(x, mean=0., sigma=0.4):
     gauss = np.random.normal(mean, sigma, size=x.shape)
