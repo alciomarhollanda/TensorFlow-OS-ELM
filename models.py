@@ -9,10 +9,9 @@ from keras.losses import categorical_crossentropy, mean_squared_error
 import numpy as np
 import pickle
 
-
 def mnist_slp_ae(train=True):
     input = Input(shape=(28*28,))
-    x = Dense(1024, activation='relu')(input)
+    x = Dense(128, activation='relu')(input)
     x = Dense(28*28, activation='sigmoid')(x)
     model = Model(input,x)
     if train:
@@ -150,6 +149,9 @@ class OS_ELM(object):
         accuracy = np.sum((np.argmax(out, axis=1) == np.argmax(y, axis=1)))
         return accuracy / batch_size
 
+    def __identify(self, x):
+        return x;
+
     def __sigmoid(self, x):
         return 1.0 / (1.0 + np.exp(-1.0 * x))
 
@@ -182,6 +184,8 @@ class OS_ELM(object):
             self.actfun = self.__sigmoid
         elif activation == 'relu':
             self.actfun = self.__relu
+        elif activation == 'linear':
+            self.actfun = self.__identify
         else:
             raise Exception('unknown activation function was specified.')
 

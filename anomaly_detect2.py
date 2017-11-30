@@ -13,7 +13,7 @@ parser.add_argument('--k',type=float,default=3.)
 parser.add_argument('--units',type=int,default=1024)
 parser.add_argument('--batch_size',type=int,default=32)
 parser.add_argument('--loss',choices=['mean_squared_error','l1_error'],default='mean_squared_error')
-parser.add_argument('--activation',choices=['sigmoid','relu'],default='sigmoid')
+parser.add_argument('--activation',choices=['sigmoid','relu','linear'],default='sigmoid')
 
 def add_gaussian_noise(x, mean=0., sigma=0.4):
     gauss = np.random.normal(mean, sigma, size=x.shape)

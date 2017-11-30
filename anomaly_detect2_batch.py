@@ -6,7 +6,7 @@ import argparse
 from PIL import Image
 
 parser = argparse.ArgumentParser()
-parser.add_argument('model',choices=['mnist_slp_ae'])
+parser.add_argument('model',choices=['mnist_slp_ae','mnist_cnn_ae'])
 parser.add_argument('dataset_normal',choices=['mnist','fashion'])
 parser.add_argument('dataset_anomal',choices=['mnist','fashion'])
 parser.add_argument('--k',type=float,default=3.)
