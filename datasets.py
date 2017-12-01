@@ -3,8 +3,7 @@ from keras.utils import to_categorical
 from sklearn.datasets import load_digits
 from utils import min_max_normalize, z_normalize
 import numpy as np
-
-
+import utils
 
 class Mnist(object):
     def __init__(self):
@@ -23,6 +22,35 @@ class Mnist(object):
         y_test = to_categorical(y_test.astype(np.float32), self.num_classes)
         return (x_train, y_train), (x_test, y_test)
 
+class Mnist_mini(object):
+    def __init__(self):
+        self.type = 'classification'
+        self.num_classes = 10
+        self.inputs = 64
+        self.outputs = 10
+
+    def load_data(self):
+        (x_train, y_train), (x_test, y_test) = mnist.load_data()
+        x_train_resized = []
+        x_test_resized = []
+        for x in x_train:
+            x = utils.resize_array(x, size=(8,8))
+            x_train_resized.append(x)
+        for x in x_test:
+            x = utils.resize_array(x, size=(8,8))
+            x_test_resized.append(x)
+        x_train_resized = np.array(x_train_resized)
+        x_test_resized = np.array(x_test_resized)
+        del x_train
+        del x_test
+        x_train_resized = x_train_resized.astype(np.float32) / 255.
+        x_test_resized = x_test_resized.astype(np.float32) / 255.
+        x_train_resized = x_train_resized.reshape(-1,self.inputs)
+        x_test_resized = x_test_resized.reshape(-1,self.inputs)
+        y_train = to_categorical(y_train.astype(np.float32), self.num_classes)
+        y_test = to_categorical(y_test.astype(np.float32), self.num_classes)
+        return (x_train_resized, y_train), (x_test_resized, y_test)
+
 class Fashion(object):
     def __init__(self):
         self.type = 'classification'
@@ -39,6 +67,35 @@ class Fashion(object):
         y_train = to_categorical(y_train.astype(np.float32), self.num_classes)
         y_test = to_categorical(y_test.astype(np.float32), self.num_classes)
         return (x_train, y_train), (x_test, y_test)
+
+class Fashion_mini(object):
+    def __init__(self):
+        self.type = 'classification'
+        self.num_classes = 10
+        self.inputs = 64
+        self.outputs = 10
+
+    def load_data(self):
+        (x_train, y_train), (x_test, y_test) = fashion_mnist.load_data()
+        x_train_resized = []
+        x_test_resized = []
+        for x in x_train:
+            x = utils.resize_array(x, size=(8,8))
+            x_train_resized.append(x)
+        for x in x_test:
+            x = utils.resize_array(x, size=(8,8))
+            x_test_resized.append(x)
+        x_train_resized = np.array(x_train_resized)
+        x_test_resized = np.array(x_test_resized)
+        del x_train
+        del x_test
+        x_train_resized = x_train_resized.astype(np.float32) / 255.
+        x_test_resized = x_test_resized.astype(np.float32) / 255.
+        x_train_resized = x_train_resized.reshape(-1,self.inputs)
+        x_test_resized = x_test_resized.reshape(-1,self.inputs)
+        y_train = to_categorical(y_train.astype(np.float32), self.num_classes)
+        y_test = to_categorical(y_test.astype(np.float32), self.num_classes)
+        return (x_train_resized, y_train), (x_test_resized, y_test)
 
 class Digits(object):
     def __init__(self):
