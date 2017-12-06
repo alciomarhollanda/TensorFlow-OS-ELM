@@ -3,6 +3,8 @@ import models
 import datasets
 import os
 import argparse
+import time
+from keras.utils import Progbar
 from PIL import Image
 
 parser = argparse.ArgumentParser()
@@ -30,14 +32,26 @@ def main(args):
 
     # training
     print('now training phase')
-    model.fit(
-        x=x_train_normal,
-        y=x_train_normal,
-        epochs=args.epochs,
-        batch_size=args.batch_size,
-        validation_data=(x_test_normal,x_test_normal),
-        shuffle=True,
-        verbose=1)
+    for epoch in range(args.epochs):
+
+        print('Epoch (%d/%d)' % (epoch+1,args.epochs))
+        perm = np.random.permutation(len(x_train_normal))
+        x_train_normal = x_train_normal[perm]
+        pbar = Progbar(target=len(x_train_normal))
+        step_time_data = []
+        for i in range(0,len(x_train_normal),args.batch_size):
+            x_batch = x_train_normal[i:i+args.batch_size]
+            s_time = time.time()
+            train_loss = model.train_on_batch(x_batch,x_batch)
+            step_time = time.time() - s_time
+            step_time_data.append(step_time)
+            pbar.add(n=len(x_batch),values=[
+                ('train_loss',train_loss),
+                ('step_time',step_time)])
+
+        test_loss = model.test_on_batch(x_test_normal,x_test_normal)
+        print('test_loss: %f' % test_loss)
+        print('step_time: %f[sec/step]' % np.mean(step_time_data))
 
     # test
     print('now test phase...')

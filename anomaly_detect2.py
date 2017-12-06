@@ -4,6 +4,7 @@ import datasets
 import os
 import argparse
 import tqdm
+import time
 from PIL import Image
 
 parser = argparse.ArgumentParser()
@@ -45,11 +46,16 @@ def main(args):
     # sequential training
     print('now sequential training phase...')
     pbar = tqdm.tqdm(total=len(x_train_normal_seq))
+    step_time_data = []
     for i in range(0,len(x_train_normal_seq),args.batch_size):
         x_batch = x_train_normal_seq[i:i+args.batch_size]
+        s_time = time.time()
         os_elm.seq_train(x_batch,x_batch)
+        step_time = time.time() - s_time
+        step_time_data.append(step_time)
         pbar.update(n=len(x_batch))
     pbar.close()
+    print('mean training time: %f [sec/step]' % np.mean(step_time_data))
 
     # test
     print('now test phase...')
