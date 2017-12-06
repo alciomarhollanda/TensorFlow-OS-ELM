@@ -4,7 +4,6 @@ import datasets
 import models
 import numpy as np
 import tqdm
-import time
 
 parser = argparse.ArgumentParser()
 parser.add_argument('anomal_class',type=int)
@@ -45,13 +44,9 @@ def main(args):
     # sequential training
     print('now sequential training phase...')
     pbar = tqdm.tqdm(total=len(x_train_seq))
-    time_data = []
     for i in range(0,len(x_train),args.batch_size):
         x_batch = x_train_seq[i:i+args.batch_size]
-        s_time = time.time()
         os_elm.seq_train(x_batch,x_batch)
-        e_time = time.time()
-        time_data.append(e_time - s_time)
         pbar.update(n=len(x_batch))
     pbar.close()
     print('mean training time: %f [sec/step]' % np.mean(time_data))
