@@ -8,7 +8,7 @@ from keras.utils import Progbar
 from PIL import Image
 
 parser = argparse.ArgumentParser()
-parser.add_argument('model',choices=['mnist_slp_ae','mnist_cnn_ae'])
+parser.add_argument('model',choices=['mnist_slp_ae','mnist_cnn_ae','digits_slp_ae'])
 parser.add_argument('dataset_normal',choices=['mnist','fashion','digits'])
 parser.add_argument('dataset_anomal',choices=['mnist','fashion','digits_inv','digits_noise'])
 parser.add_argument('--k',type=float,default=3.)

@@ -9,6 +9,17 @@ from keras.losses import categorical_crossentropy, mean_squared_error
 import numpy as np
 import pickle
 
+def digits_slp_ae(train=True):
+    input = Input(shape=(8*8,))
+    x = Dense(32, activation='relu')(input)
+    x = Dense(8*8, activation='sigmoid')(x)
+    model = Model(input,x)
+    if train:
+        model.compile(
+            optimizer=Adam(),
+            loss=mean_squared_error)
+    return model
+
 def mnist_slp_ae(train=True):
     input = Input(shape=(28*28,))
     x = Dense(128, activation='relu')(input)
@@ -117,6 +128,8 @@ def get_model(model_name, train=True):
         return mnist_slp_ae()
     elif model_name == 'digits_cnn':
         return digits_cnn(train)
+    elif model_name == 'digits_slp_ae':
+        return digits_slp_ae(train)
     elif model_name == 'boston_mlp':
         return boston_mlp(train)
     elif model_name == 'boston_slp':
