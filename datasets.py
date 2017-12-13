@@ -116,6 +116,50 @@ class Digits(object):
         y_train, y_test = y[:border], y[border:]
         return (x_train, y_train), (x_test, y_test)
 
+class Digits_inv(object):
+    def __init__(self):
+        self.type = 'classification'
+        self.num_classes = 10
+        self.inputs = 64
+        self.outputs= 10
+        self.split = 0.8
+
+    def load_data(self):
+        digits = load_digits()
+        x = digits.data.astype(np.float32)
+        x /= 255.
+        x = 1.0 - x
+        y = digits.target.astype(np.float32)
+        y = to_categorical(y, self.num_classes)
+        border = int(len(x) * self.split)
+        x_train, x_test = x[:border], x[border:]
+        y_train, y_test = y[:border], y[border:]
+        return (x_train, y_train), (x_test, y_test)
+
+class Digits_noise(object):
+    def __init__(self, mean=0., sigma=0.3):
+        self.type = 'classification'
+        self.num_classes = 10
+        self.inputs = 64
+        self.outputs= 10
+        self.split = 0.8
+        self.mean = mean
+        self.sigma = sigma
+
+    def load_data(self):
+        digits = load_digits()
+        x = digits.data.astype(np.float32)
+        x /= 255.
+        gauss = np.random.normal(self.mean, self.sigma, size=x.shape)
+        x = np.clip(x+gauss, 0., 1.)
+        y = digits.target.astype(np.float32)
+        y = to_categorical(y, self.num_classes)
+        border = int(len(x) * self.split)
+        x_train, x_test = x[:border], x[border:]
+        y_train, y_test = y[:border], y[border:]
+        return (x_train, y_train), (x_test, y_test)
+
+
 class Boston(object):
     def __init__(self):
         self.type = 'regression'
@@ -142,6 +186,10 @@ def get_dataset(dataset_name):
         dataset = Digits()
     elif dataset_name == 'boston':
         dataset = Boston()
+    elif dataset_name == 'digits_inv':
+        dataset = Digits_inv()
+    elif dataset_name == 'digits_noise':
+        dataset = Digits_noise()
     else:
         raise Exception('unknown dataset was specified.')
     return dataset
