@@ -50,7 +50,6 @@ def main(args):
     border = int(1.1 * args.units)
     x_train_normal_init = x_train_normal[:border]
     x_train_normal_seq = x_train_normal[border:]
-    x_train_normal_seq = x_train_normal_seq[:100]
 
     # instantiate model
     os_elm = models.OS_ELM(
