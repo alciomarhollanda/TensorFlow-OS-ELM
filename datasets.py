@@ -159,6 +159,26 @@ class Digits_noise(object):
         y_train, y_test = y[:border], y[border:]
         return (x_train, y_train), (x_test, y_test)
 
+class Digits_anomal(object):
+    def __init__(self, mean=0., sigma=0.3):
+        self.type = 'classification'
+        self.num_classes = 10
+        self.inputs = 64
+        self.outputs= 10
+        self.split = 0.8
+        self.mean = mean
+        self.sigma = sigma
+
+    def load_data(self):
+        digits_noise = Digits_noise(self.mean, self.sigma)
+        digits_inv = Digits_inv()
+        (x_train_noise,y_train_noise),(x_test_noise,y_test_noise) = digits_noise.load_data()
+        (x_train_inv,y_train_inv),(x_test_inv,y_test_inv) = digits_inv.load_data()
+        x_train = np.concatenate((x_train_noise,x_train_inv),axis=0)
+        y_train = np.concatenate((y_train_noise,y_train_inv),axis=0)
+        x_test = np.concatenate((x_test_noise,x_test_inv),axis=0)
+        y_test = np.concatenate((y_test_noise,y_test_inv),axis=0)
+        return (x_train, y_train), (x_test, y_test)
 
 class Boston(object):
     def __init__(self):
@@ -190,6 +210,8 @@ def get_dataset(dataset_name):
         dataset = Digits_inv()
     elif dataset_name == 'digits_noise':
         dataset = Digits_noise()
+    elif dataset_name == 'digits_anomal':
+        dataset = Digits_anomal()
     else:
         raise Exception('unknown dataset was specified.')
     return dataset
