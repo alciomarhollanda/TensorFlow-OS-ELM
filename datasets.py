@@ -137,7 +137,7 @@ class Digits_inv(object):
         return (x_train, y_train), (x_test, y_test)
 
 class Digits_noise(object):
-    def __init__(self, mean=0., sigma=0.3):
+    def __init__(self, mean=0., sigma=0.4):
         self.type = 'classification'
         self.num_classes = 10
         self.inputs = 64
