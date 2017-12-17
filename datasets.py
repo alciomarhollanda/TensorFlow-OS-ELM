@@ -108,7 +108,7 @@ class Digits(object):
     def load_data(self):
         digits = load_digits()
         x = digits.data.astype(np.float32)
-        x /= 255.
+        x /= 16.
         y = digits.target.astype(np.float32)
         y = to_categorical(y, self.num_classes)
         border = int(len(x) * self.split)
@@ -127,7 +127,7 @@ class Digits_inv(object):
     def load_data(self):
         digits = load_digits()
         x = digits.data.astype(np.float32)
-        x /= 255.
+        x /= 16.
         x = 1.0 - x
         y = digits.target.astype(np.float32)
         y = to_categorical(y, self.num_classes)
@@ -149,7 +149,7 @@ class Digits_noise(object):
     def load_data(self):
         digits = load_digits()
         x = digits.data.astype(np.float32)
-        x /= 255.
+        x /= 16.
         gauss = np.random.normal(self.mean, self.sigma, size=x.shape)
         x = np.clip(x+gauss, 0., 1.)
         y = digits.target.astype(np.float32)
