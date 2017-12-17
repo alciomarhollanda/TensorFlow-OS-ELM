@@ -16,6 +16,30 @@ parser.add_argument('--batch_size',type=int,default=32)
 parser.add_argument('--loss',choices=['mean_squared_error','l1_error'],default='mean_squared_error')
 parser.add_argument('--activation',choices=['sigmoid','relu','linear'],default='sigmoid')
 
+def compute_f_measure(os_elm,x_normal,x_anomal,k):
+    losses_normal = []
+    losses_anomal = []
+    for x in x_normal:
+        losses_normal.append(os_elm.compute_loss(x,x))
+    for x in x_anomal:
+        losses_anomal.append(os_elm.compute_loss(x,x))
+    losses = np.concatenate((losses_normal,losses_anomal),axis=0)
+    labels = np.concatenate(
+        (
+            [False for i in range(len(losses_normal))],
+            [True for i in range(len(losses_anomal))]
+        ),
+        axis=0
+    )
+    mean = np.mean(losses_normal)
+    sigma = np.std(losses_normal)
+    losses = (losses - mean) / sigma
+    thr = k;
+    TP = np.sum(labels & (losses > thr))
+    precision = TP / np.sum(losses > thr)
+    recall = TP / np.sum(labels)
+    f_measure = (2. * recall * precision) / (recall + precision)
+    return f_measure, precision, recall
 
 def main(args):
 
@@ -55,31 +79,7 @@ def main(args):
 
     # test
     print('now test phase...')
-    losses_normal = []
-    losses_anomal = []
-    for x in x_test_normal:
-        losses_normal.append(os_elm.compute_loss(x,x))
-    for x in x_test_anomal:
-        losses_anomal.append(os_elm.compute_loss(x,x))
-    loss_normal = np.mean(losses_normal)
-    loss_anomal = np.mean(losses_anomal)
-    print('loss_normal: %f' % (loss_normal))
-    print('loss_anomal: %f' % (loss_anomal))
-
-    losses = np.concatenate((losses_normal,losses_anomal),axis=0)
-    labels = np.concatenate(
-        (
-            [False for i in range(len(losses_normal))],
-            [True for i in range(len(losses_anomal))]
-        ),
-        axis=0
-    )
-    losses = (losses - loss_normal) / np.std(losses_normal)
-    thr = args.k;
-    TP = np.sum(labels & (losses > thr))
-    precision = TP / np.sum(losses > thr)
-    recall = TP / np.sum(labels)
-    f_measure = (2. * recall * precision) / (recall + precision)
+    f_measure, precision, recall = compute_f_measure(os_elm, x_test_normal, x_test_anomal, args.k)
     print('precision: %f' % precision)
     print('recall: %f' % recall)
     print('f_measure: %f' % f_measure)
