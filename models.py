@@ -22,7 +22,7 @@ def digits_slp_ae(train=True):
 
 def mnist_slp_ae(train=True):
     input = Input(shape=(28*28,))
-    x = Dense(128, activation='relu')(input)
+    x = Dense(32, activation='relu')(input)
     x = Dense(28*28, activation='sigmoid')(x)
     model = Model(input,x)
     if train:
