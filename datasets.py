@@ -87,7 +87,7 @@ class Mnist_anomal(object):
         perm = np.random.permutation(len(x_test))
         x_test = x_test[perm]
         y_test = y_test[perm]
-        return (x_train,y_train),(x_test,y_test)
+        return (x_train[:60000],y_train[:60000]),(x_test[:10000],y_test[:10000])
 
 class Mnist_mini(object):
     def __init__(self):
@@ -251,7 +251,8 @@ class Digits_anomal(object):
         perm = np.random.permutation(len(x_test))
         x_test = x_test[perm]
         y_test = y_test[perm]
-        return (x_train, y_train), (x_test, y_test)
+        return (x_train[:1437], y_train[:1437]), (x_test[:360], y_test[:360])
+
 
 class Boston(object):
     def __init__(self):
@@ -285,6 +286,8 @@ def get_dataset(dataset_name):
         dataset = Digits_noise()
     elif dataset_name == 'digits_anomal':
         dataset = Digits_anomal()
+    elif dataset_name == 'mnist_anomal':
+        dataset = Mnist_anomal()
     else:
         raise Exception('unknown dataset was specified.')
     return dataset
