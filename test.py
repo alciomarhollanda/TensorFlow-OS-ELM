@@ -1,44 +1,46 @@
-from sklearn import datasets
-import matplotlib.pyplot as plt
+from keras.models import Sequential
+from keras.layers import Dense
+from datasets import Digits
 import numpy as np
 import argparse
 import os
 
 curdir = os.path.dirname(os.path.abspath(__file__))
 parser = argparse.ArgumentParser()
-parser.add_argument('--figsize',type=int,default=5)
-parser.add_argument('--result',default=os.path.join(curdir,'images'))
+parser.add_argument('--epochs',type=int,default=10)
+parser.add_argument('--batch_size',type=int,default=32)
+parser.add_argument('--optimizer',choices=['adam','sgd','adagrad','rmsprop'],default='adam')
+
 def main(args):
 
-    # Make result directory
-    if os.path.exists(args.result) == False:
-        os.makedirs(args.result)
+    n_classes = 10
+    model = Sequential()
+    model.add(Dense(256, activation='relu',input_shape=(64,)))
+    #model.add(Dense(256, activation='relu'))
+    model.add(Dense(n_classes, activation='softmax'))
+    model.compile(optimizer=args.optimizer, loss='categorical_crossentropy', metrics=['accuracy'])
 
-    # Load the digits dataset
-    digits = datasets.load_digits()
+    dataset = Digits()
+    (x_train,y_train), (x_test,y_test) = dataset.load_data()
 
-    # normal
-    x_normal = np.concatenate(digits.images[:10],axis=-1)
-    plt.figure(1, figsize=(args.figsize,args.figsize))
-    plt.imshow(x_normal, cmap=plt.cm.gray_r, interpolation='nearest')
-    plt.savefig(os.path.join(args.result,'digits_normal.png'))
-    plt.clf()
+    model.fit(
+        x=x_train,
+        y=y_train,
+        epochs=args.epochs,
+        batch_size=args.batch_size,
+        validation_data=(x_test,y_test),
+    )
+    # Backpropagation
+    # 64 => 256 => 10
+    # val_acc: 0.9167(20 epochs, adam),
+    # val_acc: 0.8694(20 epochs, sgd),
+    # 64 => 256 => 256 => 10
+    # val_acc: 0.9111(20 epochs, adam)
+    # val_acc: 0.8694(20 epochs, sgd)
 
-    # inv
-    x_inv = 16.0 - x_normal
-    plt.figure(1, figsize=(args.figsize,args.figsize))
-    plt.imshow(x_inv, cmap=plt.cm.gray_r, interpolation='nearest')
-    plt.savefig(os.path.join(args.result,'digits_inv.png'))
-    plt.clf()
-
-    # noise
-    gauss = np.random.normal(loc=0., scale=16.0*0.3, size=x_normal.shape)
-    x_noise = np.clip(x_normal+gauss,a_min=0.,a_max=16.0)
-    plt.figure(1, figsize=(args.figsize,args.figsize))
-    plt.imshow(x_noise, cmap=plt.cm.gray_r, interpolation='nearest')
-    plt.savefig(os.path.join(args.result,'digits_noise.png'))
-    plt.clf()
-
+    # OS-ELM
+    # 64 => 256 => 10
+    # val_acc: 0.9379(sigmoid), train_acc:
 
 if __name__ == '__main__':
     args = parser.parse_args()
