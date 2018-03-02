@@ -135,6 +135,73 @@ class Fashion(object):
         y_test = to_categorical(y_test.astype(np.float32), self.num_classes)
         return (x_train, y_train), (x_test, y_test)
 
+class Fashion_inv(object):
+    def __init__(self):
+        self.type = 'classification'
+        self.num_classes = 10
+        self.inputs = 784
+        self.outputs = 10
+
+    def load_data(self):
+        (x_train, y_train), (x_test, y_test) = fashion_mnist.load_data()
+        x_train = 1. - x_train.astype(np.float32) / 255.
+        x_test = 1. - x_test.astype(np.float32) / 255.
+        x_train = x_train.reshape(-1,self.inputs)
+        x_test = x_test.reshape(-1,self.inputs)
+        y_train = to_categorical(y_train.astype(np.float32), self.num_classes)
+        y_test = to_categorical(y_test.astype(np.float32), self.num_classes)
+        return (x_train, y_train), (x_test, y_test)
+
+class Fashion_noise(object):
+    def __init__(self, mean=0., sigma=0.4):
+        self.type = 'classification'
+        self.num_classes = 10
+        self.inputs = 784
+        self.outputs = 10
+        self.mean = mean
+        self.sigma = sigma
+
+    def load_data(self):
+        (x_train, y_train), (x_test, y_test) = fashion_mnist.load_data()
+        x_train = x_train.astype(np.float32) / 255.
+        x_test = x_test.astype(np.float32) / 255.
+        gauss = np.random.normal(self.mean, self.sigma, size=x_train.shape)
+        x_train = np.clip(x_train+gauss, 0., 1.)
+        gauss = np.random.normal(self.mean, self.sigma, size=x_test.shape)
+        x_test = np.clip(x_test+gauss, 0., 1.)
+        x_train = x_train.reshape(-1,self.inputs)
+        x_test = x_test.reshape(-1,self.inputs)
+        y_train = to_categorical(y_train.astype(np.float32), self.num_classes)
+        y_test = to_categorical(y_test.astype(np.float32), self.num_classes)
+        return (x_train, y_train), (x_test, y_test)
+
+class Fashion_anomal(object):
+    def __init__(self, mean=0., sigma=0.4):
+        self.type = 'classification'
+        self.num_classes = 10
+        self.inputs = 784
+        self.outputs = 10
+        self.mean = mean
+        self.sigma = sigma
+
+    def load_data(self):
+        mnist_inv = Fashion_inv()
+        mnist_noise = Fashion_noise(self.mean,self.sigma)
+        (x_train_inv, y_train_inv), (x_test_inv, y_test_inv) = mnist_inv.load_data()
+        (x_train_noise, y_train_noise), (x_test_noise, y_test_noise) = mnist_noise.load_data()
+        x_train = np.concatenate([x_train_inv,x_train_noise], axis=0)
+        y_train = np.concatenate([y_train_inv,y_train_noise], axis=0)
+        x_test = np.concatenate([x_test_inv,x_test_noise], axis=0)
+        y_test = np.concatenate([y_test_inv,y_test_noise], axis=0)
+        # shuffle
+        perm = np.random.permutation(len(x_train))
+        x_train = x_train[perm]
+        y_train = y_train[perm]
+        perm = np.random.permutation(len(x_test))
+        x_test = x_test[perm]
+        y_test = y_test[perm]
+        return (x_train[:60000],y_train[:60000]),(x_test[:10000],y_test[:10000])
+
 class Fashion_mini(object):
     def __init__(self):
         self.type = 'classification'
