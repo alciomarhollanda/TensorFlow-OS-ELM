@@ -1,63 +1,90 @@
+import numpy as np
+import models
+import datasets
 import os
 import argparse
-import datasets
-import models
-import numpy as np
 import tqdm
+import time
+from PIL import Image
 
 parser = argparse.ArgumentParser()
-parser.add_argument('anomal_class',type=int)
-parser.add_argument('dataset',choices=['mnist','fashion','digits'])
-parser.add_argument('--thr',type=float,default=1.0)
+parser.add_argument('dataset_normal',choices=['mnist','fashion','digits'])
+parser.add_argument('dataset_anomal',choices=['mnist','fashion','digits_anomal','mnist_anomal'])
+parser.add_argument('--k',type=float,default=3.)
 parser.add_argument('--units',type=int,default=1024)
 parser.add_argument('--batch_size',type=int,default=32)
-parser.add_argument('--loss',choices=['mean_squared_error', 'l1_error'],default='mean_squared_error')
-parser.add_argument('--activation',choices=['sigmoid','relu'],default='sigmoid')
+parser.add_argument('--loss',choices=['mean_squared_error','l1_error'],default='mean_squared_error')
+parser.add_argument('--activation',choices=['sigmoid','relu','linear'],default='sigmoid')
+
+def compute_f_measure(os_elm,x_normal,x_anomal,k):
+    losses_normal = []
+    losses_anomal = []
+    for x in x_normal:
+        losses_normal.append(os_elm.compute_loss(x,x))
+    for x in x_anomal:
+        losses_anomal.append(os_elm.compute_loss(x,x))
+    losses = np.concatenate((losses_normal,losses_anomal),axis=0)
+    labels = np.concatenate(
+        (
+            [False for i in range(len(losses_normal))],
+            [True for i in range(len(losses_anomal))]
+        ),
+        axis=0
+    )
+    mean = np.mean(losses_normal)
+    sigma = np.std(losses_normal)
+    losses = (losses - mean) / sigma
+    thr = k;
+    TP = np.sum(labels & (losses > thr))
+    precision = TP / np.sum(losses > thr)
+    recall = TP / np.sum(labels)
+    f_measure = (2. * recall * precision) / (recall + precision)
+    return f_measure, precision, recall
 
 def main(args):
 
-    anomal_class = args.anomal_class
-    dataset = datasets.get_dataset(args.dataset)
-    (x_train, y_train), (x_test, y_test) = dataset.load_data()
-
-    # exclude data of anomal class
-    mask = (np.argmax(y_train,axis=-1) != anomal_class)
-    x_train = x_train[mask]
-
-    # separete dataset
-    border = int(args.units * 1.1)
-    x_train_init = x_train[:border]
-    x_train_seq = x_train[border:]
+    dataset_normal = datasets.get_dataset(args.dataset_normal)
+    dataset_anomal = datasets.get_dataset(args.dataset_anomal)
+    (x_train_normal, _), (x_test_normal, _) = dataset_normal.load_data()
+    (_, _), (x_test_anomal, _) = dataset_anomal.load_data()
+    border = int(1.1 * args.units)
+    x_train_normal_init = x_train_normal[:border]
+    x_train_normal_seq = x_train_normal[border:]
 
     # instantiate model
     os_elm = models.OS_ELM(
-        inputs=dataset.inputs,
+        inputs=dataset_normal.inputs,
         units=args.units,
-        outputs=dataset.inputs,
+        outputs=dataset_normal.inputs,
         loss=args.loss,
         activation=args.activation)
 
     # initial training
     print('now initial training phase...')
-    os_elm.init_train(x_train_init,x_train_init)
+    os_elm.init_train(x_train_normal_init, x_train_normal_init)
 
     # sequential training
     print('now sequential training phase...')
-    pbar = tqdm.tqdm(total=len(x_train_seq))
-    for i in range(0,len(x_train),args.batch_size):
-        x_batch = x_train_seq[i:i+args.batch_size]
+    pbar = tqdm.tqdm(total=len(x_train_normal_seq))
+    step_time_data = []
+    for i in range(0,len(x_train_normal_seq),args.batch_size):
+        x_batch = x_train_normal_seq[i:i+args.batch_size]
+        s_time = time.time()
         os_elm.seq_train(x_batch,x_batch)
+        step_time = time.time() - s_time
+        step_time_data.append(step_time)
         pbar.update(n=len(x_batch))
     pbar.close()
-    print('mean training time: %f [sec/step]' % np.mean(time_data))
+    print('mean training time: %f [sec/step]' % np.mean(step_time_data))
 
     # test
     print('now test phase...')
-    for id in range(dataset.num_classes):
-        mask = (np.argmax(y_test,axis=-1) == id)
-        x_batch = x_test[mask]
-        loss = os_elm.compute_loss(x_batch,x_batch)
-        print('[%d]: loss = %f' % (id, loss))
+    f_measure, precision, recall = compute_f_measure(os_elm, x_test_normal, x_test_anomal, args.k)
+    print('precision: %f' % precision)
+    print('recall: %f' % recall)
+    print('f_measure: %f' % f_measure)
+
+
 
 if __name__ == '__main__':
     args = parser.parse_args()

@@ -1,51 +1,85 @@
 import numpy as np
+import models
+import datasets
 import os
 import argparse
-import datasets
-import models
+import time
+from keras.utils import Progbar
+from PIL import Image
 
 parser = argparse.ArgumentParser()
-parser.add_argument('model',choices=[
-    'mnist_cnn_ae',
-    'mnist_slp_ae',
-    'fashion_cnn_ae',
-    'fashion_slp_ae'])
-parser.add_argument('anomal_class',type=int)
-parser.add_argument('dataset',choices=['mnist','fashion','digits'])
-parser.add_argument('--epochs', type=int, default=20)
-parser.add_argument('--batch_size', type=int, default=32)
-parser.add_argument('--result', default=None)
+parser.add_argument('model',choices=['mnist_slp_ae','mnist_cnn_ae','digits_slp_ae'])
+parser.add_argument('dataset_normal',choices=['mnist','fashion','digits'])
+parser.add_argument('dataset_anomal',choices=['mnist','fashion','digits_anomal','mnist_anomal'])
+parser.add_argument('--k',type=float,default=3.)
+parser.add_argument('--epochs',type=int,default=20)
+parser.add_argument('--batch_size',type=int,default=256)
 
 def main(args):
 
-    anomal_class = args.anomal_class
-    dataset = datasets.get_dataset(args.dataset)
-    (x_train, y_train), (x_test, y_test) = dataset.load_data()
-
-    # exclude data of anomal class
-    mask = (np.argmax(y_train,axis=-1) != anomal_class)
-    x_train = x_train[mask]
+    dataset_normal = datasets.get_dataset(args.dataset_normal)
+    dataset_anomal = datasets.get_dataset(args.dataset_anomal)
+    (x_train_normal, _), (x_test_normal, _) = dataset_normal.load_data()
+    (_, _), (x_test_anomal, _) = dataset_anomal.load_data()
 
     # instantiate model
     model = models.get_model(args.model)
 
     # training
-    print('now training phase...')
-    model.fit(
-        x_train,
-        x_train,
-        epochs=args.epochs,
-        batch_size=args.batch_size)
+    print('now training phase')
+    for epoch in range(args.epochs):
+
+        print('Epoch (%d/%d)' % (epoch+1,args.epochs))
+        perm = np.random.permutation(len(x_train_normal))
+        x_train_normal = x_train_normal[perm]
+        pbar = Progbar(target=len(x_train_normal))
+        step_time_data = []
+        for i in range(0,len(x_train_normal),args.batch_size):
+            x_batch = x_train_normal[i:i+args.batch_size]
+            s_time = time.time()
+            train_loss = model.train_on_batch(x_batch,x_batch)
+            step_time = time.time() - s_time
+            step_time_data.append(step_time)
+            pbar.add(n=len(x_batch),values=[
+                ('train_loss',train_loss),
+                ('step_time',step_time)])
+
+        test_loss = model.test_on_batch(x_test_normal,x_test_normal)
+        print('test_loss: %f' % test_loss)
+        print('step_time: %f[sec/step]' % np.mean(step_time_data))
 
     # test
     print('now test phase...')
-    for id in range(dataset.num_classes):
-        mask = (np.argmax(y_test,axis=-1) == id)
-        x_batch = x_test[mask]
-        loss = model.test_on_batch(x_batch,x_batch)
-        print('[%d]: loss = %f' % (id, loss))
+    losses_normal = []
+    losses_anomal = []
+    for x in x_test_normal:
+        x = np.expand_dims(x, axis=0)
+        losses_normal.append(model.test_on_batch(x,x))
+    for x in x_test_anomal:
+        x = np.expand_dims(x, axis=0)
+        losses_anomal.append(model.test_on_batch(x,x))
+    loss_normal = np.mean(losses_normal)
+    loss_anomal = np.mean(losses_anomal)
+    print('loss_normal: %f' % (loss_normal))
+    print('loss_anomal: %f' % (loss_anomal))
 
-
+    losses = np.concatenate((losses_normal,losses_anomal),axis=0)
+    labels = np.concatenate(
+        (
+            [False for i in range(len(losses_normal))],
+            [True for i in range(len(losses_anomal))]
+        ),
+        axis=0
+    )
+    losses = (losses - loss_normal) / np.std(losses_normal)
+    thr = args.k;
+    TP = np.sum(labels & (losses > thr))
+    precision = TP / np.sum(losses > thr)
+    recall = TP / np.sum(labels)
+    f_measure = (2. * recall * precision) / (recall + precision)
+    print('precision: %f' % precision)
+    print('recall: %f' % recall)
+    print('f_measure: %f' % f_measure)
 
 if __name__ == '__main__':
     args = parser.parse_args()
