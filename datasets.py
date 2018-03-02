@@ -343,6 +343,12 @@ def get_dataset(dataset_name):
         dataset = Mnist()
     elif dataset_name == 'fashion':
         dataset = Fashion()
+    elif dataset_name == 'fashion_inv':
+        dataset = Fashion_inv()
+    elif dataset_name == 'fashion_noise':
+        dataset = Fashion_noise()
+    elif dataset_name == 'fashion_anomal':
+        dataset = Fashion_anomal()
     elif dataset_name == 'digits':
         dataset = Digits()
     elif dataset_name == 'boston':
