@@ -185,10 +185,10 @@ class Fashion_anomal(object):
         self.sigma = sigma
 
     def load_data(self):
-        mnist_inv = Fashion_inv()
-        mnist_noise = Fashion_noise(self.mean,self.sigma)
-        (x_train_inv, y_train_inv), (x_test_inv, y_test_inv) = mnist_inv.load_data()
-        (x_train_noise, y_train_noise), (x_test_noise, y_test_noise) = mnist_noise.load_data()
+        fashion_inv = Fashion_inv()
+        fashion_noise = Fashion_noise(self.mean,self.sigma)
+        (x_train_inv, y_train_inv), (x_test_inv, y_test_inv) = fashion_inv.load_data()
+        (x_train_noise, y_train_noise), (x_test_noise, y_test_noise) = fashion_noise.load_data()
         x_train = np.concatenate([x_train_inv,x_train_noise], axis=0)
         y_train = np.concatenate([y_train_inv,y_train_noise], axis=0)
         x_test = np.concatenate([x_test_inv,x_test_noise], axis=0)
