@@ -17,3 +17,19 @@ def resize_array(x, size):
     img = Image.fromarray(x)
     img = img.resize(size=size)
     return np.array(img)
+
+def dump_nparray_to_txt(x, path):
+    shape = x.shape
+    if len(shape) == 1:
+        x = x.reshape(1,-1)
+    elif len(shape) >= 2:
+        temp = np.prod(shape[:-1])
+        x = x.reshape(temp,-1)
+    else:
+        raise ValueError('x is not a numpy array')
+    with open(path, 'w') as f:
+        for i in range(x.shape[0]):
+            for j in range(x.shape[1]):
+                v = x[i,j]
+                f.write('%.3f ' % v)
+            f.write('\n')

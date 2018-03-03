@@ -251,6 +251,15 @@ class OS_ELM(object):
         with open(path, 'wb') as f:
             pickle.dump(weights, f)
 
+    def save_weights_as_txt(self, path):
+        with open(path, 'w') as f:
+            for w in [self.alpha, self.beta, self.p]:
+                for i in range(w.shape[0]):
+                    for j in range(w.shape[1]):
+                        v = w[i,j]
+                        f.write('%.3f ' % v)
+                    f.write('\n')
+
     def load_weights(self, path):
         with open(path, 'rb') as f:
             weights = pickle.load(f)

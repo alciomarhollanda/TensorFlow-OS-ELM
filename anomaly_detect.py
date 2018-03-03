@@ -5,6 +5,7 @@ import os
 import argparse
 import tqdm
 import time
+import utils
 from PIL import Image
 
 parser = argparse.ArgumentParser()
@@ -15,6 +16,7 @@ parser.add_argument('--units',type=int,default=1024)
 parser.add_argument('--batch_size',type=int,default=32)
 parser.add_argument('--loss',choices=['mean_squared_error','l1_error'],default='mean_squared_error')
 parser.add_argument('--activation',choices=['sigmoid','relu','linear'],default='sigmoid')
+parser.add_argument('--dump_path',default=None)
 
 def compute_f_measure(os_elm,x_normal,x_anomal,k):
     losses_normal = []
@@ -50,6 +52,10 @@ def main(args):
     border = int(1.1 * args.units)
     x_train_normal_init = x_train_normal[:border]
     x_train_normal_seq = x_train_normal[border:]
+    if args.dump_path:
+        utils.dump_nparray_to_txt(x_train_normal_seq, os.path.join(args.dump_path, 'normal_seq_train_data.txt'))
+        utils.dump_nparray_to_txt(x_test_normal, os.path.join(args.dump_path, 'normal_test_data.txt'))
+        utils.dump_nparray_to_txt(x_test_anomal, os.path.join(args.dump_path, 'abnormal_data.txt'))
 
     # instantiate model
     os_elm = models.OS_ELM(
@@ -62,6 +68,10 @@ def main(args):
     # initial training
     print('now initial training phase...')
     os_elm.init_train(x_train_normal_init, x_train_normal_init)
+
+    # save weights after initial training phase
+    if args.dump_path:
+        os_elm.save_weights_as_txt(os.path.join(args.dump_path, 'initial_weights.txt'))
 
     # sequential training
     print('now sequential training phase...')
