@@ -49,7 +49,7 @@ def main(args):
     dataset_anomal = datasets.get_dataset(args.dataset_anomal)
     (x_train_normal, _), (x_test_normal, _) = dataset_normal.load_data()
     (_, _), (x_test_anomal, _) = dataset_anomal.load_data()
-    border = int(1.1 * args.units)
+    border = int(1.2 * args.units)
     x_train_normal_init = x_train_normal[:border]
     x_train_normal_seq = x_train_normal[border:]
     if args.dump_path:
