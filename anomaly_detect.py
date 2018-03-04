@@ -85,6 +85,9 @@ def main(args):
         step_time_data.append(step_time)
         pbar.update(n=len(x_batch))
     pbar.close()
+    if args.dump_path:
+        os_elm.save_weights_as_txt(os.path.join(args.dump_path, 'trained_weights.txt'))
+        
     print('mean training time: %f [sec/step]' % np.mean(step_time_data))
 
     # test
