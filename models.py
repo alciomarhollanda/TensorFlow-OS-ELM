@@ -257,7 +257,7 @@ class OS_ELM(object):
                 for i in range(w.shape[0]):
                     for j in range(w.shape[1]):
                         v = w[i,j]
-                        f.write('%.3f ' % v)
+                        f.write('%f ' % v)
                     f.write('\n')
 
     def load_weights(self, path):

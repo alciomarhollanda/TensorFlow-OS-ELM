@@ -31,5 +31,5 @@ def dump_nparray_to_txt(x, path):
         for i in range(x.shape[0]):
             for j in range(x.shape[1]):
                 v = x[i,j]
-                f.write('%.3f ' % v)
+                f.write('%f ' % v)
             f.write('\n')
