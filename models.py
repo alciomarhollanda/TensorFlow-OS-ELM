@@ -232,7 +232,7 @@ class OS_ELM(object):
         self.beta = self.p.dot(HT).dot(y)
 
     def seq_train(self, x, y):
-        H = self.actfun(x.dot(self.alpha))
+        H = self.actfun(x.dot(self.alpha) + self.bias)
         HT = H.T
         I = np.eye(len(x))# I.shape = (N, N) N:length of inputa data
 
