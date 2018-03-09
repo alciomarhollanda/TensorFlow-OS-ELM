@@ -20,6 +20,13 @@ def digits_slp_ae(train=True):
             loss=mean_squared_error)
     return model
 
+def mnist_slp(inputs, units, outputs):
+    input = Input(shape=(inputs,))
+    x = Dense(units, activation='relu')(input)
+    x = Dense(outputs, activation='sigmoid')(x)
+    model = Model(input, x)
+    return model
+
 def mnist_slp_ae(train=True):
     input = Input(shape=(28*28,))
     x = Dense(32, activation='relu')(input)
