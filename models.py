@@ -188,8 +188,8 @@ class OS_ELM(object):
         self.inputs = inputs
         self.units = units
         self.outputs = outputs
-        self.alpha = np.random.rand(inputs, units) * 2.0 - 1.0 # [-1.0, 1.0]
-        self.beta = np.random.rand(units, outputs) * 2.0 - 1.0 # [-1.0, 1.0]
+        self.alpha = np.random.rand(inputs, units) # [0, 1.0]
+        self.beta = np.random.rand(units, outputs) # [0, 1.0]
         self.bias = np.zeros(shape=(1,self.units))
         self.p = None
         self.activation = activation
