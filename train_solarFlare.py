@@ -4,6 +4,7 @@ from os_elm import OS_ELM
 import numpy as np
 import tensorflow as tf
 import tqdm
+import pandas
 
 def softmax(a):
     c = np.max(a, axis=-1).reshape(-1, 1)
@@ -16,9 +17,9 @@ def main():
     # ===========================================
     # Instantiate os-elm
     # ===========================================
-    n_input_nodes = 4
-    n_hidden_nodes = 16
-    n_output_nodes = 3
+    n_input_nodes = 12
+    n_hidden_nodes = 40
+    n_output_nodes = 2
 
     os_elm = OS_ELM(
         # the number of input nodes.
@@ -45,26 +46,38 @@ def main():
     n_classes = n_output_nodes
 
     # load Iris
-    iris = datasets.load_iris()
-    x_iris, t_iris = iris.data, iris.target
+   # iris = datasets.load_iris()
+   # x_iris, t_iris = iris.data, iris.target
+    
+
+    # https://www.kaggle.com/abhishekkrg/python-iris-data-visualization-and-explanation
+    # load SolarFlare
+
+    url="solarFlare/dataset.zscore.csv"
+    dataset = pandas.read_csv(url,sep=";")
+    x_solarFlare, t_solarFlare = dataset.values[:, 1:].astype(float) , dataset.values[:,:1].astype(float)
+
+
+    
+
 
     # normalize each column value
-    mean = np.mean(x_iris, axis=0)
-    std = np.std(x_iris, axis=0)
-    x_iris = (x_iris - mean) / std
+    #mean = np.mean(x_solarFlare, axis=0)
+    #std = np.std(x_solarFlare, axis=0)
+    #x_solarFlare = (x_solarFlare - mean) / std
 
     # convert label data into one-hot-vector format data.
-    t_iris = to_categorical(t_iris, num_classes=n_classes)
+    t_solarFlare = to_categorical(t_solarFlare, num_classes=n_classes)
 
     # shuffle dataset
-    perm = np.random.permutation(len(x_iris))
-    x_iris = x_iris[perm]
-    t_iris = t_iris[perm]
+    perm = np.random.permutation(len(x_solarFlare))
+    x_solarFlare = x_solarFlare[perm]
+    t_solarFlare = t_solarFlare[perm]
 
     # divide dataset for training and testing
-    border = int(len(x_iris) * 0.5)
-    x_train, x_test = x_iris[:border], x_iris[border:]
-    t_train, t_test = t_iris[:border], t_iris[border:]
+    border = int(len(x_solarFlare) * 0.8)
+    x_train, x_test = x_solarFlare[:border], x_solarFlare[border:]
+    t_train, t_test = t_solarFlare[:border], t_solarFlare[border:]
 
     # divide the training dataset into two datasets:
     # (1) for the initial training phase
@@ -102,7 +115,7 @@ def main():
     # Prediction
     # ===========================================
     # sample 10 validation samples from x_test
-    n = 75
+    n = 1464
     x = x_test[:n]
     t = t_test[:n]
 
@@ -112,12 +125,22 @@ def main():
     y = softmax(y)
 
     # check the answers.
+    countTrue=0
+    countFlare=0
     for i in range(n):
         max_ind = np.argmax(y[i])
         print('========== sample index %d ==========' % i)
         print('estimated answer: class %d' % max_ind)
         print('estimated probability: %.3f' % y[i,max_ind])
         print('true answer: class %d' % np.argmax(t[i]))
+        if(max_ind == 1 and max_ind==np.argmax(t[i])):
+            countTrue=countTrue+1
+        if(1==np.argmax(t[i])):
+            countFlare=countFlare+1
+    
+    print('## true answer estimated true => %d ' % countTrue)
+    print('## true answer true => %d ' % countFlare)
+
 
     # ===========================================
     # Evaluation
