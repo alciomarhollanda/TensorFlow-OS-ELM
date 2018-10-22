@@ -18,7 +18,7 @@ def main():
     # Instantiate os-elm
     # ===========================================
     n_input_nodes = 12
-    n_hidden_nodes = 40
+    n_hidden_nodes = 16
     n_output_nodes = 2
 
     os_elm = OS_ELM(
@@ -53,7 +53,8 @@ def main():
     # https://www.kaggle.com/abhishekkrg/python-iris-data-visualization-and-explanation
     # load SolarFlare
 
-    url="solarFlare/dataset.zscore.csv"
+    #url="solarFlare/dataset.zscore.csv"
+    url="solarFlare/dataset.csv"
     dataset = pandas.read_csv(url,sep=";")
     x_solarFlare, t_solarFlare = dataset.values[:, 1:].astype(float) , dataset.values[:,:1].astype(float)
 
@@ -62,17 +63,18 @@ def main():
 
 
     # normalize each column value
-    #mean = np.mean(x_solarFlare, axis=0)
-    #std = np.std(x_solarFlare, axis=0)
-    #x_solarFlare = (x_solarFlare - mean) / std
+    mean = np.mean(x_solarFlare, axis=0)
+    std = np.std(x_solarFlare, axis=0)
+    x_solarFlare = (x_solarFlare - mean) / std
 
     # convert label data into one-hot-vector format data.
     t_solarFlare = to_categorical(t_solarFlare, num_classes=n_classes)
 
     # shuffle dataset
-    perm = np.random.permutation(len(x_solarFlare))
-    x_solarFlare = x_solarFlare[perm]
-    t_solarFlare = t_solarFlare[perm]
+    #
+    #perm = np.random.permutation(len(x_solarFlare))
+    #x_solarFlare = x_solarFlare[perm]
+    #t_solarFlare = t_solarFlare[perm]
 
     # divide dataset for training and testing
     border = int(len(x_solarFlare) * 0.8)
@@ -125,22 +127,31 @@ def main():
     y = softmax(y)
 
     # check the answers.
-    countTrue=0
+    countHitFlat=0
     countFlare=0
+    countErroTargetFlare=0
+    countMaxInd =0
     for i in range(n):
         max_ind = np.argmax(y[i])
-        print('========== sample index %d ==========' % i)
-        print('estimated answer: class %d' % max_ind)
-        print('estimated probability: %.3f' % y[i,max_ind])
-        print('true answer: class %d' % np.argmax(t[i]))
+        if(max_ind == 1):
+            #print('========== sample index %d ==========' % i)
+            #print('estimated answer: class %d' % max_ind)
+            #print('estimated probability: %.3f' % y[i,max_ind])
+            #print('true answer: class %d' % np.argmax(t[i]))
+            countMaxInd=countMaxInd+1
         if(max_ind == 1 and max_ind==np.argmax(t[i])):
-            countTrue=countTrue+1
+            countHitFlat=countHitFlat+1
+        if(max_ind == 1 and max_ind!=np.argmax(t[i])):
+            countErroTargetFlare=countErroTargetFlare+1
         if(1==np.argmax(t[i])):
             countFlare=countFlare+1
     
-    print('## true answer estimated true => %d ' % countTrue)
-    print('## true answer true => %d ' % countFlare)
-
+    print('#############################')
+    print('## Hit Flare probability => %d ' % countHitFlat)
+    print('## CountFlare => %d ' % countFlare)
+    print('## countErroTargetFlare => %d ' % countErroTargetFlare) 
+    print('## countMaxInd => %d ' % countMaxInd) 
+    print('#############################')
 
     # ===========================================
     # Evaluation

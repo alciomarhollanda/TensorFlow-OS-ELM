@@ -4,6 +4,7 @@ from os_elm import OS_ELM
 import numpy as np
 import tensorflow as tf
 import tqdm
+import pandas
 
 def softmax(a):
     c = np.max(a, axis=-1).reshape(-1, 1)
@@ -17,7 +18,7 @@ def main():
     # Instantiate os-elm
     # ===========================================
     n_input_nodes = 4
-    n_hidden_nodes = 16
+    n_hidden_nodes = 14
     n_output_nodes = 3
 
     os_elm = OS_ELM(
@@ -45,16 +46,32 @@ def main():
     n_classes = n_output_nodes
 
     # load Iris
-    iris = datasets.load_iris()
-    x_iris, t_iris = iris.data, iris.target
+    #iris = datasets.load_iris()
+    #x_iris, t_iris = iris.data, iris.target
+
+    url="iris/iris_test"
+    dataset = pandas.read_csv(url,sep="\t")
+    #x_test, t_test = dataset.values[:, 1:] , dataset.values[:,:1]
+    x_train, t_train = dataset.values[:, 1:] , dataset.values[:,:1]
+
+    url="iris/iris_train"
+    dataset = pandas.read_csv(url,sep="\t")
+    #x_train, t_train = dataset.values[:, 1:] , dataset.values[:,:1]
+    x_test, t_test = dataset.values[:, 1:] , dataset.values[:,:1]
 
     # normalize each column value
-    mean = np.mean(x_iris, axis=0)
-    std = np.std(x_iris, axis=0)
-    x_iris = (x_iris - mean) / std
+    mean = np.mean(x_test, axis=0)
+    std = np.std(x_test, axis=0)
+    x_test = (x_test - mean) / std
+    # normalize each column value
+    mean = np.mean(x_train, axis=0)
+    std = np.std(x_train, axis=0)
+    x_train = (x_train - mean) / std
 
     # convert label data into one-hot-vector format data.
-    t_iris = to_categorical(t_iris, num_classes=n_classes)
+    
+    t_test = to_categorical(t_test, num_classes=n_classes)
+    t_train = to_categorical(t_train, num_classes=n_classes)
 
     # shuffle dataset
     #perm = np.random.permutation(len(x_iris))
@@ -62,9 +79,9 @@ def main():
     #t_iris = t_iris[perm]
 
     # divide dataset for training and testing
-    border = int(len(x_iris) * 0.8)
-    x_train, x_test = x_iris[:border], x_iris[border:]
-    t_train, t_test = t_iris[:border], t_iris[border:]
+    #border = int(len(x_iris) * 0.8)
+    #x_train, x_test = x_iris[:border], x_iris[border:]
+    #t_train, t_test = t_iris[:border], t_iris[border:]
 
     # divide the training dataset into two datasets:
     # (1) for the initial training phase
@@ -102,7 +119,7 @@ def main():
     # Prediction
     # ===========================================
     # sample 10 validation samples from x_test
-    n = 10
+    n = len(x_test)
     x = x_test[:n]
     t = t_test[:n]
 
